@@ -1,0 +1,28 @@
+{
+  "current": {
+    "temp": 31,
+    "feelsLike": 34,
+    "condition": "Patchy rain nearby",
+    "conditionCode": "rain_patchy",
+    "humidity": 78,
+    "pressure": 1008,
+    "windSpeed": 18,
+    "windDirection": "SW",
+    "uvIndex": 4,
+    "rainProbability": 65,
+    "sunrise": "06:12 AM",
+    "sunset": "07:05 PM",
+    "riskLevel": "warning",
+    "riskScore": 45,
+    "timestamp": "2026-07-30T14:30:00Z"
+  },
+  "hourly": [
+    { "time": "02:00 PM", "temp": 31, "condition": "Cloudy", "icon": "cloud", "rainChance": 20 },
+    { "time": "03:00 PM", "temp": 30, "condition": "Patchy Rain", "icon": "cloud-rain", "rainChance": 65 },
+    { "time": "04:00 PM", "temp": 29, "condition": "Rainy", "icon": "cloud-lightning", "rainChance": 85 },
+    { "time": "05:00 PM", "temp": 28, "condition": "Heavy Rain", "icon": "cloud-lightning", "rainChance": 90 },
+    { "time": "06:00 PM", "temp": 27, "condition": "Drizzle", "icon": "cloud-drizzle", "rainChance": 70 },
+    { "time": "07:00 PM", "temp": 27, "condition": "Overcast", "icon": "cloud", "rainChance": 40 },
+    { "time": "08:00 PM", "temp": 26, "condition": "Clear Night", "icon": "moon", "rainChance": 10 }
+  ]
+}

@@ -1,0 +1,13 @@
+[
+  { "id": "GJ_RAJ_JET", "districtId": "GJ_RAJ", "name": "Jetpur" },
+  { "id": "GJ_RAJ_GON", "districtId": "GJ_RAJ", "name": "Gondal" },
+  { "id": "GJ_RAJ_DHO", "districtId": "GJ_RAJ", "name": "Dhoraji" },
+  { "id": "PB_BTI_BM", "districtId": "PB_BTI", "name": "Bhucho Mandi" },
+  { "id": "PB_BTI_MA", "districtId": "PB_BTI", "name": "Maur" },
+  { "id": "BR_PAT_DAN", "districtId": "BR_PAT", "name": "Danapur" },
+  { "id": "BR_PAT_MAN", "districtId": "BR_PAT", "name": "Maner" },
+  { "id": "MH_SAT_KAR", "districtId": "MH_SAT", "name": "Karad" },
+  { "id": "MH_SAT_WAI", "districtId": "MH_SAT", "name": "Wai" },
+  { "id": "KA_TUM_GUB", "districtId": "KA_TUM", "name": "Gubbi" },
+  { "id": "KA_TUM_SIR", "districtId": "KA_TUM", "name": "Sira" }
+]

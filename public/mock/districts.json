@@ -1,0 +1,13 @@
+[
+  { "id": "GJ_RAJ", "stateId": "GJ", "name": "Rajkot" },
+  { "id": "GJ_AHM", "stateId": "GJ", "name": "Ahmedabad" },
+  { "id": "GJ_SUR", "stateId": "GJ", "name": "Surat" },
+  { "id": "BR_PAT", "stateId": "BR", "name": "Patna" },
+  { "id": "BR_GAY", "stateId": "BR", "name": "Gaya" },
+  { "id": "PB_ASR", "stateId": "PB", "name": "Amritsar" },
+  { "id": "PB_BTI", "stateId": "PB", "name": "Bathinda" },
+  { "id": "MH_SAT", "stateId": "MH", "name": "Satara" },
+  { "id": "MH_PUN", "stateId": "MH", "name": "Pune" },
+  { "id": "KA_TUM", "stateId": "KA", "name": "Tumakuru" },
+  { "id": "KA_BLR", "stateId": "KA", "name": "Bengaluru" }
+]

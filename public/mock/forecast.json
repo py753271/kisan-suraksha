@@ -1,0 +1,9 @@
+[
+  { "day": "Today", "tempMin": 25, "tempMax": 31, "condition": "Patchy rain", "icon": "cloud-rain", "rainChance": 65 },
+  { "day": "Fri", "tempMin": 24, "tempMax": 30, "condition": "Heavy thunderstorms", "icon": "cloud-lightning", "rainChance": 90 },
+  { "day": "Sat", "tempMin": 25, "tempMax": 32, "condition": "Showers", "icon": "cloud-drizzle", "rainChance": 75 },
+  { "day": "Sun", "tempMin": 26, "tempMax": 33, "condition": "Mostly cloudy", "icon": "cloud", "rainChance": 40 },
+  { "day": "Mon", "tempMin": 27, "tempMax": 34, "condition": "Partly sunny", "icon": "cloud-sun", "rainChance": 20 },
+  { "day": "Tue", "tempMin": 26, "tempMax": 35, "condition": "Sunny and clear", "icon": "sun", "rainChance": 5 },
+  { "day": "Wed", "tempMin": 25, "tempMax": 33, "condition": "Overcast sky", "icon": "cloud", "rainChance": 50 }
+]
