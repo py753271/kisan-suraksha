@@ -1,26 +1,92 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary-green: #2E7D32;
+  --color-secondary-green: #4CAF50;
+  --color-brand-blue: #1565C0;
+  --color-warning-yellow: #FFC107;
+  --color-danger-orange: #FB8C00;
+  --color-critical-red: #E53935;
+  --color-success-green: #43A047;
+
+  --color-ks-bg: var(--ks-bg);
+  --color-ks-surface: var(--ks-surface);
+  --color-ks-text: var(--ks-text);
+  --color-ks-text-secondary: var(--ks-text-secondary);
+  --color-ks-border: var(--ks-border);
+
+  --font-heading: var(--font-heading-family);
+  --font-body: var(--font-body-family);
+  
+  --shadow-ks-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-ks-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-ks-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ks-bg: #F7FAF5;
+  --ks-surface: #FFFFFF;
+  --ks-text: #1B1B1B;
+  --ks-text-secondary: #616161;
+  --ks-border: #E5E7EB;
+  --font-heading-family: 'Poppins', 'Inter', sans-serif;
+  --font-body-family: 'Inter', 'Roboto', sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  --ks-bg: #121411;
+  --ks-surface: #1E221C;
+  --ks-text: #F3F4F6;
+  --ks-text-secondary: #9CA3AF;
+  --ks-border: #374151;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.high-contrast {
+  --ks-bg: #000000 !important;
+  --ks-surface: #000000 !important;
+  --ks-text: #FFFFFF !important;
+  --ks-text-secondary: #FFFF00 !important;
+  --ks-border: #FFFFFF !important;
+  --color-primary-green: #00FF00 !important;
+  --color-secondary-green: #00FF00 !important;
+  --color-brand-blue: #00FFFF !important;
+  --color-warning-yellow: #FFFF00 !important;
+  --color-danger-orange: #FF8C00 !important;
+  --color-critical-red: #FF0000 !important;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--ks-bg);
+  color: var(--ks-text);
+  font-family: var(--font-body-family);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Accessibility touch-targets and utilities */
+.touch-target {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+/* Simple language helper style */
+.jargon-free {
+  font-weight: 500;
+  text-decoration: underline dotted;
+  cursor: help;
+}
+
+/* Leaflet maps styling fix for full view */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+}
+.leaflet-popup-content-wrapper {
+  background: var(--ks-surface) !important;
+  color: var(--ks-text) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07) !important;
+}
+.leaflet-popup-tip {
+  background: var(--ks-surface) !important;
 }

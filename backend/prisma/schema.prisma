@@ -1,0 +1,1141 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==========================================
+// 1. IDENTITY & ACCESS MANAGEMENT (IAM)
+// ==========================================
+
+model Role {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @unique
+  description String?
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  users       User[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @unique
+  description String?
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  roles RolePermission[]
+}
+
+model RolePermission {
+  roleId       String     @db.Uuid
+  permissionId String     @db.Uuid
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model User {
+  id               String  @id @default(uuid()) @db.Uuid
+  email            String  @unique
+  passwordHash     String
+  fullName         String
+  phone            String?
+  isEmailVerified  Boolean @default(false)
+  isMobileVerified Boolean @default(false)
+  roleId           String  @db.Uuid
+  role             Role    @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  // Account lock mechanism
+  loginAttempts Int       @default(0)
+  lockUntil     DateTime?
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  sessions       UserSession[]
+  refreshTokens  RefreshToken[]
+  savedLocations SavedLocation[]
+  sosRequests    SOSRequest[]
+  auditLogs      AuditLog[]
+  notifications  Notification[]
+  preferences    NotificationPreference[]
+  reports        Report[]
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  isRevoked Boolean  @default(false)
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+model UserSession {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @db.Uuid
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceDetails String?
+  ipAddress     String?
+  expiresAt     DateTime
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+// ==========================================
+// 2. ADMINISTRATIVE LOCATION HIERARCHY
+// ==========================================
+
+model Country {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+  code String @unique
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  states State[]
+}
+
+model State {
+  id        String  @id @default(uuid()) @db.Uuid
+  name      String  @unique
+  code      String  @unique
+  countryId String  @db.Uuid
+  country   Country @relation(fields: [countryId], references: [id], onDelete: Restrict)
+  boundary  Json? // GeoJSON polygon representing boundary bounds
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  districts District[]
+  locations SavedLocation[]
+  contacts  EmergencyContact[]
+}
+
+model District {
+  id       String @id @default(uuid()) @db.Uuid
+  name     String
+  code     String @unique
+  stateId  String @db.Uuid
+  state    State  @relation(fields: [stateId], references: [id], onDelete: Restrict)
+  boundary Json?
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  tehsils   Tehsil[]
+  locations SavedLocation[]
+  contacts  EmergencyContact[]
+}
+
+model Tehsil {
+  id         String   @id @default(uuid()) @db.Uuid
+  name       String
+  code       String   @unique
+  districtId String   @db.Uuid
+  district   District @relation(fields: [districtId], references: [id], onDelete: Restrict)
+  boundary   Json?
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  villages  Village[]
+  locations SavedLocation[]
+  contacts  EmergencyContact[]
+}
+
+model Village {
+  id       String @id @default(uuid()) @db.Uuid
+  name     String
+  code     String @unique
+  tehsilId String @db.Uuid
+  tehsil   Tehsil @relation(fields: [tehsilId], references: [id], onDelete: Restrict)
+  boundary Json?
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  locations SavedLocation[]
+  contacts  EmergencyContact[]
+}
+
+model SavedLocation {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @db.Uuid
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stateId    String?   @db.Uuid
+  state      State?    @relation(fields: [stateId], references: [id], onDelete: SetNull)
+  districtId String?   @db.Uuid
+  district   District? @relation(fields: [districtId], references: [id], onDelete: SetNull)
+  tehsilId   String?   @db.Uuid
+  tehsil     Tehsil?   @relation(fields: [tehsilId], references: [id], onDelete: SetNull)
+  villageId  String?   @db.Uuid
+  village    Village?  @relation(fields: [villageId], references: [id], onDelete: SetNull)
+
+  latitude  Decimal @db.Decimal(9, 6)
+  longitude Decimal @db.Decimal(9, 6)
+  pinCode   String?
+  nickname  String // e.g. "Home", "Sowing Field", "Coop Office"
+  isDefault Boolean @default(false)
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  sosRequests SOSRequest[]
+}
+
+// ==========================================
+// 3. WEATHER PLATFORM
+// ==========================================
+
+model Weather {
+  id              String            @id @default(uuid()) @db.Uuid
+  locationName    String?
+  latitude        Decimal           @db.Decimal(9, 6)
+  longitude       Decimal           @db.Decimal(9, 6)
+  temp            Decimal           @db.Decimal(5, 2)
+  feelsLike       Decimal           @db.Decimal(5, 2)
+  condition       String
+  conditionCode   String
+  humidity        Int
+  pressure        Int
+  windSpeed       Decimal           @db.Decimal(6, 2)
+  windDirection   String
+  uvIndex         Int
+  rainProbability Int
+  sunrise         String
+  sunset          String
+  riskLevel       String
+  riskScore       Int
+  timestamp       DateTime
+  sourceId        String?           @db.Uuid
+  source          GovernmentSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  @@index([latitude, longitude])
+}
+
+model WeatherForecast {
+  id           String            @id @default(uuid()) @db.Uuid
+  latitude     Decimal           @db.Decimal(9, 6)
+  longitude    Decimal           @db.Decimal(9, 6)
+  forecastTime DateTime
+  forecastType String // "hourly", "daily"
+  temp         Decimal           @db.Decimal(5, 2)
+  condition    String
+  icon         String
+  rainChance   Int
+  sourceId     String?           @db.Uuid
+  source       GovernmentSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  @@index([latitude, longitude, forecastTime])
+}
+
+model WeatherHistory {
+  id         String            @id @default(uuid()) @db.Uuid
+  latitude   Decimal           @db.Decimal(9, 6)
+  longitude  Decimal           @db.Decimal(9, 6)
+  recordedAt DateTime
+  temp       Decimal           @db.Decimal(5, 2)
+  humidity   Int
+  windSpeed  Decimal           @db.Decimal(6, 2)
+  condition  String
+  sourceId   String?           @db.Uuid
+  source     GovernmentSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+model GovernmentSource {
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String    @unique
+  type          String // e.g. IMD, NDMA, CWC, INCOIS
+  endpointUrl   String
+  syncFrequency String // Cron format e.g. "*/15 * * * *"
+  isActive      Boolean   @default(true)
+  lastSyncAt    DateTime?
+  status        String    @default("HEALTHY") // HEALTHY, UNHEALTHY
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  weathers     Weather[]
+  forecasts    WeatherForecast[]
+  histories    WeatherHistory[]
+  alerts       Alert[]
+  syncLogs     GovernmentSyncLog[]
+  syncFailures SyncFailureLog[]
+  datasets     ExternalDataset[]
+  mapLayers    MapLayer[]
+  healthChecks ProviderHealth[]
+}
+
+// ==========================================
+// 4. DISASTER ALERTS & GIS LAYERS
+// ==========================================
+
+model AlertCategory {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @unique
+  description String?
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  alerts Alert[]
+}
+
+model AlertSeverity {
+  id        String @id @default(uuid()) @db.Uuid
+  name      String @unique // Info, Minor, Moderate, Severe, Extreme
+  colorCode String // Hex color code
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  alerts Alert[]
+}
+
+model Alert {
+  id              String            @id @default(uuid()) @db.Uuid
+  categoryId      String            @db.Uuid
+  category        AlertCategory     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  severityId      String            @db.Uuid
+  severity        AlertSeverity     @relation(fields: [severityId], references: [id], onDelete: Restrict)
+  sourceId        String?           @db.Uuid
+  source          GovernmentSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  title           String
+  description     String
+  instructions    String?
+  status          String            @default("Active") // Active, Scheduled, Cancelled, Expired
+  effectiveTime   DateTime
+  expiryTime      DateTime
+  affectedArea    Json? // GeoJSON polygon for bounding box queries
+  affectedRegions Json? // JSON list of state, district, tehsil, village codes
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  histories     AlertHistory[]
+  notifications Notification[]
+
+  @@index([status, expiryTime])
+}
+
+model AlertHistory {
+  id          String   @id @default(uuid()) @db.Uuid
+  alertId     String   @db.Uuid
+  alert       Alert    @relation(fields: [alertId], references: [id], onDelete: Cascade)
+  action      String // Created, Updated, Cancelled, Expired
+  reason      String?
+  performedBy String?
+  timestamp   DateTime @default(now())
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+model MapLayer {
+  id       String            @id @default(uuid()) @db.Uuid
+  name     String
+  type     String // e.g. "flood_risk", "lightning_density", "boundaries"
+  geojson  Json
+  sourceId String?           @db.Uuid
+  source   GovernmentSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+model EmergencyShelter {
+  id               String  @id @default(uuid()) @db.Uuid
+  name             String
+  capacity         Int
+  currentOccupancy Int     @default(0)
+  contactNumber    String
+  latitude         Decimal @db.Decimal(9, 6)
+  longitude        Decimal @db.Decimal(9, 6)
+  address          String
+  facilities       Json? // List of amenities
+  accessibility    Json? // List of accessibility aids
+  status           String  @default("Open") // Open, Closed, Full
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  @@index([latitude, longitude])
+}
+
+model EmergencyResource {
+  id            String  @id @default(uuid()) @db.Uuid
+  name          String
+  description   String?
+  quantity      Int
+  locationName  String?
+  contactPerson String?
+  contactPhone  String?
+  latitude      Decimal @db.Decimal(9, 6)
+  longitude     Decimal @db.Decimal(9, 6)
+  status        String  @default("Available")
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+// ==========================================
+// 5. CROP ADVISORY & RECS
+// ==========================================
+
+model CropCategory {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @unique
+  description String?
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  crops Crop[]
+}
+
+model Crop {
+  id          String       @id @default(uuid()) @db.Uuid
+  name        String       @unique
+  categoryId  String       @db.Uuid
+  category    CropCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  description String?
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  advisories CropAdvisory[]
+}
+
+model CropAdvisory {
+  id                 String @id @default(uuid()) @db.Uuid
+  cropId             String @db.Uuid
+  crop               Crop   @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  stage              String // Sowing, Vegetative, Flowering, Harvesting
+  season             String // Kharif, Rabi, Zaid
+  ruleCondition      Json // JSON conditional logic triggers
+  advisoryText       String
+  recommendedActions Json? // JSON array of specific farm steps
+  riskLevel          String // Low, Moderate, High, Critical
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  histories AdvisoryHistory[]
+}
+
+model AdvisoryHistory {
+  id                    String       @id @default(uuid()) @db.Uuid
+  advisoryId            String       @db.Uuid
+  advisory              CropAdvisory @relation(fields: [advisoryId], references: [id], onDelete: Cascade)
+  generatedAt           DateTime     @default(now())
+  inputParams           Json
+  generatedAdvisoryText String
+  generatedRiskLevel    String
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+// ==========================================
+// 6. EMERGENCY & SOS SERVICES
+// ==========================================
+
+model SOSRequest {
+  id             String         @id @default(uuid()) @db.Uuid
+  userId         String         @db.Uuid
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  latitude       Decimal        @db.Decimal(9, 6)
+  longitude      Decimal        @db.Decimal(9, 6)
+  locationId     String?        @db.Uuid
+  location       SavedLocation? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  disasterType   String
+  priority       String         @default("Medium") // Low, Medium, High, Critical
+  status         String         @default("Pending") // Pending, Dispatched, Resolved, Cancelled
+  assignedAgency String?
+  notes          String?
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  histories SOSHistory[]
+}
+
+model SOSHistory {
+  id           String     @id @default(uuid()) @db.Uuid
+  sosRequestId String     @db.Uuid
+  sosRequest   SOSRequest @relation(fields: [sosRequestId], references: [id], onDelete: Cascade)
+  status       String
+  note         String?
+  timestamp    DateTime   @default(now())
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+model EmergencyContact {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String
+  phone       String
+  serviceType String // Hospital, Police, Fire, National, State, District, Local, Disaster-specific
+  stateId     String?   @db.Uuid
+  state       State?    @relation(fields: [stateId], references: [id], onDelete: SetNull)
+  districtId  String?   @db.Uuid
+  district    District? @relation(fields: [districtId], references: [id], onDelete: SetNull)
+  tehsilId    String?   @db.Uuid
+  tehsil      Tehsil?   @relation(fields: [tehsilId], references: [id], onDelete: SetNull)
+  villageId   String?   @db.Uuid
+  village     Village?  @relation(fields: [villageId], references: [id], onDelete: SetNull)
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+// ==========================================
+// 7. NOTIFICATIONS & BULK COMMUNICATIONS
+// ==========================================
+
+model NotificationTemplate {
+  id       String  @id @default(uuid()) @db.Uuid
+  name     String  @unique
+  subject  String?
+  body     String
+  channel  String // Push, SMS, Email, WhatsApp
+  language String  @default("en")
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  notifications Notification[]
+}
+
+model Notification {
+  id          String                @id @default(uuid()) @db.Uuid
+  userId      String?               @db.Uuid
+  user        User?                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  alertId     String?               @db.Uuid
+  alert       Alert?                @relation(fields: [alertId], references: [id], onDelete: SetNull)
+  templateId  String?               @db.Uuid
+  template    NotificationTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  title       String
+  body        String
+  category    String // Weather, Alert, Crop, Emergency, Profile, System
+  priority    String                @default("Normal") // High, Normal, Low
+  scheduledAt DateTime?
+  sentAt      DateTime?
+  status      String                @default("Pending") // Pending, Sent, Failed, Cancelled
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  deliveries NotificationDelivery[]
+}
+
+model NotificationPreference {
+  id                String  @id @default(uuid()) @db.Uuid
+  userId            String  @db.Uuid
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel           String // Push, SMS, Email, WhatsApp
+  isEnabled         Boolean @default(true)
+  quietHoursStart   String?
+  quietHoursEnd     String?
+  emergencyOverride Boolean @default(true)
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  @@unique([userId, channel])
+}
+
+model NotificationDelivery {
+  id             String       @id @default(uuid()) @db.Uuid
+  notificationId String       @db.Uuid
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  channel        String
+  recipient      String
+  status         String       @default("Pending")
+  retryCount     Int          @default(0)
+  errorMessage   String?
+  sentAt         DateTime?
+  deliveredAt    DateTime?
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  logs NotificationLog[]
+}
+
+model NotificationLog {
+  id         String               @id @default(uuid()) @db.Uuid
+  deliveryId String               @db.Uuid
+  delivery   NotificationDelivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  status     String
+  logMessage String
+  timestamp  DateTime             @default(now())
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+// ==========================================
+// 8. GOVERNMENT SYNC CONTROLLERS
+// ==========================================
+
+model GovernmentSyncLog {
+  id            String           @id @default(uuid()) @db.Uuid
+  sourceId      String           @db.Uuid
+  source        GovernmentSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  status        String
+  recordsSynced Int
+  errorMessage  String?
+  startedAt     DateTime
+  completedAt   DateTime
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+model ExternalDataset {
+  id            String           @id @default(uuid()) @db.Uuid
+  sourceId      String           @db.Uuid
+  source        GovernmentSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  name          String
+  payload       Json
+  lastUpdatedAt DateTime         @default(now())
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  versions DatasetVersion[]
+}
+
+model DatasetVersion {
+  id        String          @id @default(uuid()) @db.Uuid
+  datasetId String          @db.Uuid
+  dataset   ExternalDataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  payload   Json
+  hash      String
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+model SyncFailureLog {
+  id              String           @id @default(uuid()) @db.Uuid
+  sourceId        String           @db.Uuid
+  source          GovernmentSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  errorType       String
+  errorMessage    String
+  requestPayload  Json?
+  responsePayload Json?
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+model ProviderHealth {
+  id            String           @id @default(uuid()) @db.Uuid
+  sourceId      String           @db.Uuid
+  source        GovernmentSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  isHealthy     Boolean
+  latencyMs     Int
+  lastCheckedAt DateTime         @default(now())
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+// ==========================================
+// 9. ENTERPRISE ANALYTICS & MONITORING
+// ==========================================
+
+model DashboardSnapshot {
+  id          String   @id @default(uuid()) @db.Uuid
+  type        String // OVERVIEW, WEATHER, ALERTS, CROPS, EMERGENCY, SYSTEM
+  data        Json
+  generatedAt DateTime @default(now())
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+model AnalyticsSnapshot {
+  id          String   @id @default(uuid()) @db.Uuid
+  metricName  String
+  metricValue Decimal  @db.Decimal(18, 4)
+  dimensions  Json?
+  timestamp   DateTime @default(now())
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+model MetricsHistory {
+  id        String   @id @default(uuid()) @db.Uuid
+  category  String
+  name      String
+  value     Decimal  @db.Decimal(18, 4)
+  timestamp DateTime @default(now())
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+model SystemMetrics {
+  id                 String   @id @default(uuid()) @db.Uuid
+  cpuUsage           Decimal  @db.Decimal(5, 2)
+  memoryUsage        Decimal  @db.Decimal(5, 2)
+  databaseStatus     String
+  redisStatus        String
+  queueStatus        String
+  apiRequestCount    Int
+  apiResponseTimeAvg Decimal  @db.Decimal(8, 2)
+  apiErrorRate       Decimal  @db.Decimal(5, 2)
+  timestamp          DateTime @default(now())
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+model Report {
+  id           String  @id @default(uuid()) @db.Uuid
+  title        String
+  type         String // DAILY, WEEKLY, MONTHLY
+  format       String // JSON, CSV
+  url          String?
+  content      Json?
+  createdById  String? @db.Uuid
+  createdByRef User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+// ==========================================
+// 10. AI PREDICTIONS ENGINE
+// ==========================================
+
+model PredictionModel {
+  id            String  @id @default(uuid()) @db.Uuid
+  name          String
+  type          String
+  versionString String
+  isActive      Boolean @default(true)
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  results PredictionResult[]
+}
+
+model PredictionResult {
+  id              String          @id @default(uuid()) @db.Uuid
+  modelId         String          @db.Uuid
+  model           PredictionModel @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  targetArea      Json? // GeoJSON Polygon target
+  predictionType  String
+  confidenceScore Decimal         @db.Decimal(5, 2)
+  payload         Json
+  forecastTime    DateTime
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+
+  histories PredictionHistory[]
+}
+
+model PredictionHistory {
+  id                String           @id @default(uuid()) @db.Uuid
+  predictionId      String           @db.Uuid
+  prediction        PredictionResult @relation(fields: [predictionId], references: [id], onDelete: Cascade)
+  verifiedAt        DateTime?
+  isAccurate        Boolean?
+  verificationNotes String?
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+// ==========================================
+// 11. GENERAL METADATA & PROCESS CONTROL
+// ==========================================
+
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @db.Uuid
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  tableName String
+  recordId  String
+  oldValues Json?
+  newValues Json?
+  ipAddress String?
+  timestamp DateTime @default(now())
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+model BackgroundJob {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String
+  status      String    @default("Pending") // Pending, Running, Completed, Failed
+  payload     Json?
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(3)
+  errorLog    String?
+  runAt       DateTime
+  lockedAt    DateTime?
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+model CacheMetadata {
+  id        String   @id @default(uuid()) @db.Uuid
+  cacheKey  String   @unique
+  tag       String
+  expiresAt DateTime
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}
+
+model SystemSetting {
+  id          String  @id @default(uuid()) @db.Uuid
+  settingKey  String  @unique
+  value       String
+  description String?
+
+  // Standard enterprise audits
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  version   Int       @default(1)
+}

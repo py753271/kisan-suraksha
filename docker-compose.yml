@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: ks-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: kisansuraksha
+      POSTGRES_USER: kisanadmin
+      POSTGRES_PASSWORD: supersecretpassword123
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - ks-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kisanadmin -d kisansuraksha"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: ks-redis
+    restart: always
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redisdata:/data
+    networks:
+      - ks-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ks-backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - DATABASE_URL=postgresql://kisanadmin:supersecretpassword123@postgres:5432/kisansuraksha?schema=public
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_SECRET=supersecuretokensecretkeys12345
+      - JWT_REFRESH_SECRET=supersecuretokenrefreshsecretkeys12345
+      - CORS_ORIGIN=http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - ks-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ks-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+    depends_on:
+      - backend
+    networks:
+      - ks-network
+
+volumes:
+  pgdata:
+    driver: local
+  redisdata:
+    driver: local
+
+networks:
+  ks-network:
+    driver: bridge

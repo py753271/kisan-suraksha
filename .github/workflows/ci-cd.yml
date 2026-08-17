@@ -1,0 +1,90 @@
+name: Kisan Suraksha CI/CD pipeline
+
+on:
+  pull_request:
+    branches: [ main, 'release/*' ]
+  push:
+    branches: [ main, 'release/*' ]
+
+jobs:
+  validate-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Verify ESLint style guidelines
+        working-directory: ./backend
+        run: npm run lint
+
+      - name: Verify Prisma Client generation
+        working-directory: ./backend
+        run: npx prisma generate
+
+      - name: Verify TypeScript Compilation
+        working-directory: ./backend
+        run: npm run build
+
+      - name: Run Backend Tests
+        working-directory: ./backend
+        run: npm run test
+
+  validate-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify ESLint style guidelines
+        run: npm run lint
+
+      - name: Verify Next.js Production Compilation
+        run: npm run build
+
+  build-docker-images:
+    needs: [validate-backend, validate-frontend]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Backend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: false
+          tags: kisansuraksha-backend:latest
+
+      - name: Build Frontend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: kisansuraksha-frontend:latest

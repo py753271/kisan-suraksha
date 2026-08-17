@@ -1,103 +1,133 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React from 'react';
+import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useGeolocation } from '@/hooks/useGeolocation';
+import { Shield, Navigation, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/atoms/Button';
+import { SearchBox } from '@/components/molecules/SearchBox';
+
+export default function WelcomePage() {
+  const router = useRouter();
+  const { language, setLanguage, t } = useLanguage();
+  const { getGeoLocation, latitude, longitude, loading, error } = useGeolocation();
+
+  const handleLanguageSelect = (lang: 'en' | 'hi' | 'gu') => {
+    setLanguage(lang);
+  };
+
+  const handleGpsLocation = () => {
+    getGeoLocation();
+  };
+
+  // If GPS fetches successfully, store configuration and proceed
+  React.useEffect(() => {
+    if (latitude && longitude) {
+      localStorage.setItem('ks_location_lat', String(latitude));
+      localStorage.setItem('ks_location_lng', String(longitude));
+      localStorage.setItem('ks_location_name', 'Rajkot, Gujarat (GPS)');
+      localStorage.setItem('ks_state', 'GJ');
+      router.push('/dashboard');
+    }
+  }, [latitude, longitude, router]);
+
+  const handleVillageSelect = (name: string) => {
+    localStorage.setItem('ks_location_name', name);
+    // Find matching state/district details (e.g. Bihar if Patna, Punjab if Bathinda, else Gujarat)
+    if (name.includes('Patna') || name.includes('Danapur') || name.includes('Maner')) {
+      localStorage.setItem('ks_state', 'BR');
+    } else if (name.includes('Bathinda') || name.includes('Maur') || name.includes('Bhucho')) {
+      localStorage.setItem('ks_state', 'PB');
+    } else {
+      localStorage.setItem('ks_state', 'GJ');
+    }
+    router.push('/dashboard');
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="w-full min-h-screen bg-ks-bg text-ks-text flex flex-col justify-center items-center p-4">
+      {/* Container Box */}
+      <div className="w-full max-w-md bg-ks-surface border border-ks-border rounded-3xl p-6 md:p-8 shadow-ks-lg flex flex-col gap-6">
+        
+        {/* Brand Stamp */}
+        <div className="flex flex-col items-center text-center gap-2">
+          <div className="p-4 bg-primary-green/10 rounded-full">
+            <Shield className="w-12 h-12 text-primary-green fill-primary-green/10" />
+          </div>
+          <h1 className="font-heading font-black text-2xl md:text-3xl text-primary-green leading-none">
+            {t('appTitle')}
+          </h1>
+          <p className="text-xs text-ks-text-secondary font-semibold max-w-xs">
+            {t('welcomeMessage')}
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {/* Language Selection Gate */}
+        <div className="flex flex-col gap-2.5">
+          <label className="text-xs font-bold uppercase tracking-wider text-ks-text-secondary">
+            {t('languageGateTitle')}
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { code: 'en', label: 'English' },
+              { code: 'hi', label: 'हिंदी' },
+              { code: 'gu', label: 'ગુજરાતી' }
+            ].map(item => (
+              <button
+                key={item.code}
+                type="button"
+                onClick={() => handleLanguageSelect(item.code as 'en' | 'hi' | 'gu')}
+                className={`touch-target py-3 rounded-xl font-bold border transition text-sm select-none cursor-pointer ${
+                  language === item.code
+                    ? 'bg-primary-green text-white border-primary-green shadow-ks-sm'
+                    : 'border-ks-border hover:bg-ks-border/20 text-ks-text'
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="border-t border-ks-border/60 my-1" />
+
+        {/* Location selector */}
+        <div className="flex flex-col gap-4">
+          <label className="text-xs font-bold uppercase tracking-wider text-ks-text-secondary">
+            {t('selectVillage')}
+          </label>
+
+          {/* Search suggestions */}
+          <SearchBox onSelect={handleVillageSelect} />
+
+          <div className="flex items-center justify-center gap-3">
+            <span className="h-px bg-ks-border/60 flex-1" />
+            <span className="text-[10px] font-bold text-ks-text-secondary uppercase">{t('or')}</span>
+            <span className="h-px bg-ks-border/60 flex-1" />
+          </div>
+
+          {/* GPS Detector button */}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleGpsLocation}
+            isLoading={loading}
+            className="w-full flex items-center justify-center gap-2 border-2"
+          >
+            <Navigation className="w-5 h-5 text-primary-green" />
+            <span>{t('currentLocationBtn')}</span>
+          </Button>
+
+          {error && (
+            <div className="bg-critical-red/10 border border-critical-red/20 rounded-xl p-3 flex gap-2 items-center text-critical-red">
+              <AlertCircle className="w-5 h-5 shrink-0" />
+              <p className="text-xs font-semibold leading-snug">{error}</p>
+            </div>
+          )}
+        </div>
+
+      </div>
     </div>
   );
 }

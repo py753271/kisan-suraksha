@@ -1,0 +1,42 @@
+[
+  {
+    "id": "crop-adv-001",
+    "cropType": "Cotton",
+    "stage": "Harvesting",
+    "weatherTrigger": "Monsoon rain expected in 24 hours",
+    "title": "Immediate Cotton Picking recommended",
+    "advice": "Accelerate cotton boll picking today. Store harvested cotton in covered concrete structures immediately. Rain will damage quality and open bolls.",
+    "severity": "danger",
+    "icon": "shield-alert"
+  },
+  {
+    "id": "crop-adv-002",
+    "cropType": "Paddy (Rice)",
+    "stage": "Vegetative",
+    "weatherTrigger": "High rain / Flood risk",
+    "title": "Drain excess water from nurseries",
+    "advice": "Open water drainage outlets in low-lying fields. Delay nitrogen fertilizer application to prevent chemical runoff during heavy storms.",
+    "severity": "warning",
+    "icon": "cloud-rain"
+  },
+  {
+    "id": "crop-adv-003",
+    "cropType": "Wheat",
+    "stage": "Sowing / Tillering",
+    "weatherTrigger": "Frost advisory",
+    "title": "Light irrigation for frost protection",
+    "advice": "Apply light evening irrigation to raise soil temperatures and shield wheat tillers from overnight ground frost damage.",
+    "severity": "warning",
+    "icon": "wind"
+  },
+  {
+    "id": "crop-adv-004",
+    "cropType": "Vegetables",
+    "stage": "Flowering",
+    "weatherTrigger": "High wind warning",
+    "title": "Provide staking support to plants",
+    "advice": "Provide strong stake support for tomato, chili, and vine crops. Avoid pesticide spraying during gusty wind periods (>20 km/h).",
+    "severity": "warning",
+    "icon": "info"
+  }
+]

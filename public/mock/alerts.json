@@ -1,0 +1,46 @@
+[
+  {
+    "id": "alert-001",
+    "category": "Cyclone",
+    "severity": "critical",
+    "title": "Severe Cyclone Warning: Cyclone 'Asani'",
+    "description": "Cyclone Asani is expected to make landfall with wind speeds up to 120 km/h. High storm surge expected in low-lying coastal belts. Evacuate designated areas immediately.",
+    "instructions": "Move livestock to elevated concrete shelters. Secure loose roof sheets. Turn off main power switches. Stay indoors.",
+    "source": "National Disaster Management Authority (NDMA)",
+    "timestamp": "2026-07-30T14:15:00Z",
+    "affectedAreas": ["Rajkot", "Coastal Saurashtra"]
+  },
+  {
+    "id": "alert-002",
+    "category": "Flood",
+    "severity": "danger",
+    "title": "River Water Level Alert: Ganga Basin",
+    "description": "River Ganga water levels are rising rapidly at Patna gauge station and have exceeded the warning mark by 0.65 meters. Immediate catchment flooding expected.",
+    "instructions": "Avoid crossing river bridges. Move farm equipment away from shallow riverbanks. Prepare clean drinking water reserves.",
+    "source": "Central Water Commission (CWC)",
+    "timestamp": "2026-07-30T13:40:00Z",
+    "affectedAreas": ["Patna", "Danapur"]
+  },
+  {
+    "id": "alert-003",
+    "category": "Lightning",
+    "severity": "warning",
+    "title": "Thunderstorm and Lightning Strike Warning",
+    "description": "Scattered thunderstorms accompanied by high-density lightning strikes are expected over the next 6 hours in Patna block.",
+    "instructions": "Do not seek shelter under tall trees or standalone electricity poles during rains. Move indoors. Unplug electronic farm devices.",
+    "source": "India Meteorological Department (IMD)",
+    "timestamp": "2026-07-30T12:00:00Z",
+    "affectedAreas": ["Patna", "Maner"]
+  },
+  {
+    "id": "alert-004",
+    "category": "Heatwave",
+    "severity": "warning",
+    "title": "Severe Heatwave Conditions",
+    "description": "Maximum temperatures are likely to hover around 44-46 degrees Celsius for the next 3 days. High thermal index risks.",
+    "instructions": "Avoid field operations between 11:30 AM and 3:30 PM. Keep livestock in well-ventilated shaded zones. Drink saline-electrolyte water.",
+    "source": "India Meteorological Department (IMD)",
+    "timestamp": "2026-07-30T09:00:00Z",
+    "affectedAreas": ["Bathinda", "Amritsar"]
+  }
+]

@@ -1,0 +1,28 @@
+[
+  {
+    "stateId": "GJ",
+    "contacts": [
+      { "name": "Gujarat State Disaster Control Room", "number": "1070" },
+      { "name": "Rajkot District Helpline", "number": "0281-2444565" },
+      { "name": "Rajkot Agri Officer (Jetpur Block)", "number": "+91 98250 12345" },
+      { "name": "National Emergency Service", "number": "112" }
+    ]
+  },
+  {
+    "stateId": "BR",
+    "contacts": [
+      { "name": "Bihar Disaster Management Control", "number": "1070" },
+      { "name": "Patna Flood Helpline", "number": "0612-2217305" },
+      { "name": "Block Panchayat Supervisor", "number": "+91 94310 54321" },
+      { "name": "National Emergency Service", "number": "112" }
+    ]
+  },
+  {
+    "stateId": "PB",
+    "contacts": [
+      { "name": "Punjab Disaster Helpline", "number": "108" },
+      { "name": "Bathinda District Control Room", "number": "0164-2212000" },
+      { "name": "National Emergency Service", "number": "112" }
+    ]
+  }
+]
