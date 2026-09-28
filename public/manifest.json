@@ -1,0 +1,21 @@
+{
+  "name": "Kisan Suraksha",
+  "short_name": "KisanSuraksha",
+  "description": "Official Disaster Intelligence & Early Warning System",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d1b13",
+  "theme_color": "#22c55e",
+  "icons": [
+    {
+      "src": "/globe.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/globe.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

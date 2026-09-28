@@ -25,7 +25,7 @@ export default function AuthPage() {
       if (isLogin) {
         await login(email, password);
       } else {
-        await register({ fullName, email, password, phone, roleName: 'Farmer' });
+        await register({ fullName, email, password, phone, roleName: 'FARMER' });
         setRegistered(true);
         setIsLogin(true);
       }
@@ -151,6 +151,11 @@ export default function AuthPage() {
                 className="w-full pl-10 pr-4 py-3 rounded-xl border border-ks-border bg-ks-surface text-sm focus:outline-none focus:border-primary-green"
               />
             </div>
+            {!isLogin && (
+              <p className="text-[11px] text-ks-text-secondary mt-0.5">
+                Must be 8+ chars with uppercase, lowercase, number & special char (e.g. <span className="text-primary-green font-mono">Test@1234</span>)
+              </p>
+            )}
           </div>
 
           <Button

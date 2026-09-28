@@ -12,9 +12,12 @@ export const registerValidator = z.object({
   body: z.object({
     fullName: z.string().min(2, 'Name must be at least 2 characters'),
     email: z.string().email('Invalid email address'),
-    phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format').optional(),
+    phone: z.preprocess((val) => (typeof val === 'string' && val.trim() === '' ? undefined : val), z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format').optional()),
     password: passwordStrengthSchema,
-    roleName: z.enum(['SUPER_ADMIN', 'STATE_ADMIN', 'DISTRICT_ADMIN', 'AGRICULTURE_OFFICER', 'FARMER']).default('FARMER'),
+    roleName: z.preprocess(
+      (val) => (typeof val === 'string' ? val.toUpperCase() : val),
+      z.enum(['SUPER_ADMIN', 'STATE_ADMIN', 'DISTRICT_ADMIN', 'AGRICULTURE_OFFICER', 'FARMER'])
+    ).default('FARMER'),
   }),
 });
 

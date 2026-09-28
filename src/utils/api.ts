@@ -109,9 +109,12 @@ api.interceptors.response.use(
       }
     }
 
+    const data = error.response.data as any;
+    const message = data?.error?.message || data?.message || 'An API error occurred.';
     return Promise.reject({
       status,
-      message: (error.response.data as any)?.message || 'An API error occurred.',
+      message,
+      data,
     });
   }
 );
