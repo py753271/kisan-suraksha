@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import { useContactsQuery } from '@/hooks/useQueries';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import { Card } from '@/components/atoms/Card';
@@ -10,17 +8,8 @@ import { Skeleton } from '@/components/atoms/Skeleton';
 import { Phone, AlertTriangle } from 'lucide-react';
 
 export default function EmergencyPage() {
-  const { user, loading: authLoading } = useAuth();
-  const router = useRouter();
-
   const [savedState, setSavedState] = useState('GJ');
   const [stateName, setStateName] = useState('Gujarat');
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/auth');
-    }
-  }, [user, authLoading, router]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -33,10 +22,6 @@ export default function EmergencyPage() {
   }, []);
 
   const { data: contacts = [], isLoading } = useContactsQuery(savedState);
-
-  if (authLoading || !user) {
-    return null;
-  }
 
   return (
     <DashboardLayout>

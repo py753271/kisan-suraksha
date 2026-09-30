@@ -32,15 +32,23 @@ export default function WelcomePage() {
     }
   }, [latitude, longitude, router]);
 
-  const handleVillageSelect = (name: string) => {
-    localStorage.setItem('ks_location_name', name);
-    // Find matching state/district details (e.g. Bihar if Patna, Punjab if Bathinda, else Gujarat)
-    if (name.includes('Patna') || name.includes('Danapur') || name.includes('Maner')) {
-      localStorage.setItem('ks_state', 'BR');
-    } else if (name.includes('Bathinda') || name.includes('Maur') || name.includes('Bhucho')) {
-      localStorage.setItem('ks_state', 'PB');
-    } else {
-      localStorage.setItem('ks_state', 'GJ');
+  const handleVillageSelect = (location: import('@/components/molecules/SearchBox').LocationResult) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('ks_location_id', location.id);
+      localStorage.setItem('ks_location_type', location.type);
+      localStorage.setItem('ks_location_name', location.displayName || location.name);
+      if (location.latitude != null && location.longitude != null) {
+        localStorage.setItem('ks_location_lat', String(location.latitude));
+        localStorage.setItem('ks_location_lng', String(location.longitude));
+      } else {
+        localStorage.removeItem('ks_location_lat');
+        localStorage.removeItem('ks_location_lng');
+      }
+      localStorage.setItem('ks_location_state', location.stateName || '');
+      localStorage.setItem('ks_state', location.stateCode || '');
+      if (location.districtName) {
+        localStorage.setItem('ks_location_district', location.districtName);
+      }
     }
     router.push('/dashboard');
   };

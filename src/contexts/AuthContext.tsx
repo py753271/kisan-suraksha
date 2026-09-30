@@ -55,7 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const handleLogoutEvent = () => {
       setUser(null);
       setAccessToken(null);
-      router.push('/auth');
+      router.push('/');
     };
 
     if (typeof window !== 'undefined') {

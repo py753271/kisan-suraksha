@@ -50,6 +50,56 @@ export class BoundaryRepository {
     `;
     return results[0] || null;
   }
+
+  // Case-insensitive partial name search across Districts and Villages
+  async searchLocations(query: string, limit = 10): Promise<{ districts: any[]; villages: any[] }> {
+    const [districts, villages] = await Promise.all([
+      db.district.findMany({
+        where: {
+          deletedAt: null,
+          name: { contains: query, mode: 'insensitive' },
+        },
+        select: {
+          id: true,
+          name: true,
+          code: true,
+          boundary: true,
+          state: { select: { id: true, name: true, code: true } },
+        },
+        take: limit,
+      }),
+      db.village.findMany({
+        where: {
+          deletedAt: null,
+          name: { contains: query, mode: 'insensitive' },
+        },
+        select: {
+          id: true,
+          name: true,
+          code: true,
+          boundary: true,
+          tehsil: {
+            select: {
+              id: true,
+              name: true,
+              code: true,
+              district: {
+                select: {
+                  id: true,
+                  name: true,
+                  code: true,
+                  state: { select: { id: true, name: true, code: true } },
+                },
+              },
+            },
+          },
+        },
+        take: limit,
+      }),
+    ]);
+
+    return { districts, villages };
+  }
 }
 
 export default BoundaryRepository;

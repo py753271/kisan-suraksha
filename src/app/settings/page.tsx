@@ -1,18 +1,13 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
+import React from 'react';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
-import { usePreferencesQuery, useUpdatePreferencesMutation } from '@/hooks/useQueries';
+import { usePreferencesQuery } from '@/hooks/useQueries';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import { Card } from '@/components/atoms/Card';
 import { Accessibility, Eye, Bell, Check, Loader2 } from 'lucide-react';
 
 export default function AccessibilitySettingsPage() {
-  const { user, loading: authLoading, logout } = useAuth();
-  const router = useRouter();
-
   const {
     textSize,
     setTextSize,
@@ -22,30 +17,7 @@ export default function AccessibilitySettingsPage() {
     setSimpleLanguage
   } = useAccessibility();
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/auth');
-    }
-  }, [user, authLoading, router]);
-
   const { data: preferences = [], isLoading: prefLoading } = usePreferencesQuery();
-  const updatePrefMutation = useUpdatePreferencesMutation();
-
-  const handleToggleChannel = async (channel: string, currentEnabled: boolean) => {
-    // Modify preferences payload
-    const updated = preferences.map((p: any) =>
-      p.channel === channel ? { ...p, isEnabled: !currentEnabled } : p
-    );
-    try {
-      await updatePrefMutation.mutateAsync(updated);
-    } catch (err) {
-      console.error('Failed to update channel preferences', err);
-    }
-  };
-
-  if (authLoading || !user) {
-    return null;
-  }
 
   const isSmsEnabled = preferences.find((p: any) => p.channel === 'SMS')?.isEnabled ?? true;
   const isEmailEnabled = preferences.find((p: any) => p.channel === 'EMAIL')?.isEnabled ?? false;
@@ -66,12 +38,6 @@ export default function AccessibilitySettingsPage() {
               Customize layout size, color contrasts, and early warning communications channels.
             </p>
           </div>
-          <button
-            onClick={logout}
-            className="touch-target px-4 py-2 border border-critical-red/30 text-critical-red rounded-xl text-xs font-bold hover:bg-critical-red/10 cursor-pointer"
-          >
-            Sign Out
-          </button>
         </div>
 
         {/* Configurations grid */}
@@ -177,8 +143,7 @@ export default function AccessibilitySettingsPage() {
               ].map(item => (
                 <div
                   key={item.code}
-                  onClick={() => handleToggleChannel(item.code, item.active)}
-                  className={`flex flex-col gap-2 p-4 border border-ks-border rounded-2xl cursor-pointer hover:bg-ks-border/10 transition relative ${
+                  className={`flex flex-col gap-2 p-4 border border-ks-border rounded-2xl relative ${
                     item.active ? 'bg-primary-green/5 border-primary-green' : 'bg-ks-surface'
                   }`}
                 >

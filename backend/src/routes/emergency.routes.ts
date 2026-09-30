@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import EmergencyController from '../controllers/emergency.controller';
 import { validate } from '../middlewares/validation.middleware';
-import { authenticate } from '../middlewares/auth.middleware';
+import { optionalAuthenticate } from '../middlewares/auth.middleware';
 import {
   sosRequestValidator,
   contactsQueryValidator,
@@ -15,8 +15,8 @@ import { asyncHandler } from '../utils/async-handler';
 const router = Router();
 const controller = new EmergencyController();
 
-// Secure emergency endpoints behind authenticated context
-router.use(authenticate);
+// Support public emergency contacts, shelters, and resources with optional authentication
+router.use(optionalAuthenticate);
 
 router.post('/sos', validate(sosRequestValidator), asyncHandler(controller.createSOS));
 router.get('/sos', asyncHandler(controller.getSOSRequests));

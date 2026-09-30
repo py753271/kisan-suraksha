@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import CropController from '../controllers/crop.controller';
 import { validate } from '../middlewares/validation.middleware';
-import { authenticate } from '../middlewares/auth.middleware';
+import { optionalAuthenticate } from '../middlewares/auth.middleware';
 import {
   advisoryQueryValidator,
   recommendationQueryValidator,
@@ -13,8 +13,8 @@ import { asyncHandler } from '../utils/async-handler';
 const router = Router();
 const controller = new CropController();
 
-// Guard agricultural advisory endpoints behind authenticated user context
-router.use(authenticate);
+// Support public crop advisories with optional authentication
+router.use(optionalAuthenticate);
 
 router.get('/current', validate(advisoryQueryValidator), asyncHandler(controller.getCurrentAdvisories));
 router.get('/history', validate(advisoryHistoryQueryValidator), asyncHandler(controller.getAdvisoryHistory));

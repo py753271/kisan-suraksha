@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import WeatherController from '../controllers/weather.controller';
 import { validate } from '../middlewares/validation.middleware';
-import { authenticate } from '../middlewares/auth.middleware';
+import { optionalAuthenticate } from '../middlewares/auth.middleware';
 import {
   weatherQueryValidator,
   weatherHistoryValidator,
@@ -11,8 +11,8 @@ import { asyncHandler } from '../utils/async-handler';
 const router = Router();
 const controller = new WeatherController();
 
-// All weather queries are protected behind authenticated user context
-router.use(authenticate);
+// Support public weather queries with optional authentication
+router.use(optionalAuthenticate);
 
 router.get('/current', validate(weatherQueryValidator), asyncHandler(controller.getCurrent));
 router.get('/hourly', validate(weatherQueryValidator), asyncHandler(controller.getHourly));

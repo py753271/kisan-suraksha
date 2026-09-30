@@ -16,6 +16,7 @@ const mockBoundaryRepo = {
   findTehsilBoundary: jest.fn<any>(),
   findVillageBoundary: jest.fn<any>(),
   findBoundaryByPoint: jest.fn<any>(),
+  searchLocations: jest.fn<any>(),
 } as any;
 
 const mockShelterRepo = {
@@ -90,6 +91,49 @@ describe('GIS & Interactive Map Module Unit Tests (Phase 6)', () => {
       expect(result.name).toBe('Gujarat');
       expect(mockBoundaryRepo.findStateBoundary).toHaveBeenCalledWith('GJ');
       expect(mockSet).toHaveBeenCalled();
+    });
+  });
+
+  describe('MapService (Location Search)', () => {
+    it('Should return only PostgreSQL locations and ignore unmapped mock entries', async () => {
+      mockGet.mockResolvedValue(null);
+      mockBoundaryRepo.searchLocations.mockResolvedValue({
+        districts: [{ id: 'd-1', name: 'Rajkot', code: 'GJ_RAJ', state: { name: 'Gujarat', code: 'GJ' } }],
+        villages: [],
+      });
+      mockSet.mockResolvedValue(true);
+
+      const results = await mapService.searchLocations('raj', 10);
+      expect(results).toHaveLength(1);
+      expect(results[0].name).toBe('Rajkot');
+      expect(results[0].latitude).toBe(22.3039);
+      expect(results[0].longitude).toBe(70.8022);
+    });
+
+    it('Should return null coordinates for DB locations without valid mapping or boundary instead of Rajkot fallback', async () => {
+      mockGet.mockResolvedValue(null);
+      mockBoundaryRepo.searchLocations.mockResolvedValue({
+        districts: [{ id: 'd-99', name: 'Unknown District', code: 'UNKNOWN_CODE', boundary: null, state: { name: 'SomeState', code: 'SS' } }],
+        villages: [],
+      });
+      mockSet.mockResolvedValue(true);
+
+      const results = await mapService.searchLocations('unknown', 10);
+      expect(results).toHaveLength(1);
+      expect(results[0].name).toBe('Unknown District');
+      expect(results[0].latitude).toBeNull();
+      expect(results[0].longitude).toBeNull();
+    });
+
+    it('Should return empty array when DB returns no matches even if query matches old static mock dataset', async () => {
+      mockGet.mockResolvedValue(null);
+      mockBoundaryRepo.searchLocations.mockResolvedValue({
+        districts: [],
+        villages: [],
+      });
+
+      const results = await mapService.searchLocations('Bathinda', 10);
+      expect(results).toEqual([]);
     });
   });
 

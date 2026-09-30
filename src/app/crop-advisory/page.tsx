@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import { useCropAdvisoriesQuery } from '@/hooks/useQueries';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import CropAdvisoryCard from '@/components/organisms/CropAdvisoryCard';
@@ -11,18 +9,9 @@ import { Skeleton } from '@/components/atoms/Skeleton';
 import { BookOpen } from 'lucide-react';
 
 export default function CropAdvisoryPage() {
-  const { user, loading: authLoading } = useAuth();
-  const router = useRouter();
-
   const [lat, setLat] = useState(22.3);
   const [lon, setLon] = useState(70.7);
   const [cropType, setCropType] = useState('all');
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/auth');
-    }
-  }, [user, authLoading, router]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -46,10 +35,6 @@ export default function CropAdvisoryPage() {
   const handleFilter = (type: string) => {
     setCropType(type);
   };
-
-  if (authLoading || !user) {
-    return null;
-  }
 
   return (
     <DashboardLayout>

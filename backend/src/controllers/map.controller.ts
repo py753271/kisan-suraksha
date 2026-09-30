@@ -48,6 +48,14 @@ export class MapController {
     const administrativeDetails = await this.spatialService.reverseGeocode(lon, lat);
     sendSuccess(res, administrativeDetails, undefined, 'Reverse geocoding boundaries lookup compiled');
   };
+
+  searchLocations = async (req: Request, res: Response): Promise<void> => {
+    const q = String(req.query.q || '');
+    const limit = Number(req.query.limit || 10);
+
+    const locations = await this.mapService.searchLocations(q, limit);
+    sendSuccess(res, locations, undefined, 'Locations search results compiled successfully');
+  };
 }
 
 export default MapController;

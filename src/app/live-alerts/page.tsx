@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import { useAlertsQuery } from '@/hooks/useQueries';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import GovernmentAlertCard from '@/components/organisms/GovernmentAlertCard';
@@ -11,19 +9,10 @@ import { Skeleton } from '@/components/atoms/Skeleton';
 import { Search, Filter, AlertOctagon } from 'lucide-react';
 
 export default function LiveAlertsTimeline() {
-  const { user, loading: authLoading } = useAuth();
-  const router = useRouter();
-
   const [lat, setLat] = useState(22.3);
   const [lon, setLon] = useState(70.7);
   const [search, setSearch] = useState('');
   const [severityFilter, setSeverityFilter] = useState<string>('all');
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/auth');
-    }
-  }, [user, authLoading, router]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -52,10 +41,6 @@ export default function LiveAlertsTimeline() {
 
     return matchesSearch && matchesSeverity;
   });
-
-  if (authLoading || !user) {
-    return null;
-  }
 
   return (
     <DashboardLayout>

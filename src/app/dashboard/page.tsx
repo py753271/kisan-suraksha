@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import {
   useWeatherQuery,
   useAlertsQuery,
@@ -19,20 +17,12 @@ import { AlertTriangle, Navigation, RefreshCw } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 
 export default function FarmerDashboard() {
-  const { user, loading: authLoading } = useAuth();
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   const [locationName, setLocationName] = useState('Rajkot, Gujarat');
   const [lat, setLat] = useState(22.3);
   const [lon, setLon] = useState(70.7);
   const [sosOpen, setSosOpen] = useState(false);
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/auth');
-    }
-  }, [user, authLoading, router]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -53,24 +43,13 @@ export default function FarmerDashboard() {
   const { data: alerts = [], isLoading: alertsLoading } = useAlertsQuery(lat, lon);
   const { data: advisories = [], isLoading: advisoriesLoading } = useCropAdvisoriesQuery(lat, lon);
 
-  const loading = weatherLoading || alertsLoading || advisoriesLoading || authLoading;
+  const loading = weatherLoading || alertsLoading || advisoriesLoading;
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['weather', lat, lon] });
     queryClient.invalidateQueries({ queryKey: ['alerts', lat, lon] });
     queryClient.invalidateQueries({ queryKey: ['cropAdvisories', lat, lon] });
   };
-
-  if (authLoading || !user) {
-    return (
-      <div className="min-h-screen bg-ks-bg flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <RefreshCw className="w-8 h-8 text-primary-green animate-spin" />
-          <p className="text-sm font-semibold text-ks-text-secondary">Restoring farmer session...</p>
-        </div>
-      </div>
-    );
-  }
 
   const mappedCurrentWeather = weather
     ? {

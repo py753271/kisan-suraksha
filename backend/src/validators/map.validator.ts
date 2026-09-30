@@ -31,3 +31,10 @@ export const reverseGeocodeValidator = z.object({
     lon: coordinateSchema.min(-180).max(180),
   }),
 });
+
+export const locationSearchValidator = z.object({
+  query: z.object({
+    q: z.string().trim().min(2, 'Search query must be at least 2 characters'),
+    limit: z.coerce.number().int().min(1).max(20).default(10).optional(),
+  }),
+});
